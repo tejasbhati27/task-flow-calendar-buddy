@@ -4,8 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import TaskList from '@/components/TaskList';
 import { Task } from '@/types';
 import { format, isToday } from 'date-fns';
-import { Calendar as CalendarIcon, CheckCircle, ListTodo } from 'lucide-react';
+import { Calendar as CalendarIcon, ListTodo, BarChart3 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 interface DashboardProps {
   tasks: Task[];
@@ -16,13 +17,18 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({ tasks, onToggleComplete, onAddTask }) => {
   // Filter today's tasks
   const todayTasks = tasks.filter(task => isToday(new Date(task.dueDate)));
+  const todayTasksLimited = todayTasks.slice(0, 10);
+  const hasMoreTodayTasks = todayTasks.length > 10;
   
   // Get upcoming tasks (not today, not completed)
   const upcomingTasks = tasks.filter(task => 
     !isToday(new Date(task.dueDate)) && 
     !task.completed && 
     new Date(task.dueDate) > new Date()
-  ).sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime()).slice(0, 5);
+  ).sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
+  
+  const upcomingTasksLimited = upcomingTasks.slice(0, 10);
+  const hasMoreUpcomingTasks = upcomingTasks.length > 10;
   
   // Calculate completion stats
   const completedTasks = tasks.filter(task => task.completed).length;
@@ -31,11 +37,11 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, onToggleComplete, onAddTas
     : 0;
 
   return (
-    <div className="container py-8">
+    <div className="container py-8 animate-fade-in">
       <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
       
       <div className="grid gap-6 md:grid-cols-3 mb-8">
-        <Card>
+        <Card className="hover:shadow-md transition-all duration-300">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Tasks Today
@@ -49,7 +55,7 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, onToggleComplete, onAddTas
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="hover:shadow-md transition-all duration-300">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Completion Rate
@@ -59,14 +65,14 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, onToggleComplete, onAddTas
             <div className="text-3xl font-bold">{completionRate}%</div>
             <div className="h-2 mt-2 rounded-full bg-muted overflow-hidden">
               <div 
-                className="h-full bg-primary" 
+                className="h-full bg-primary transition-all duration-500" 
                 style={{ width: `${completionRate}%` }} 
               />
             </div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="hover:shadow-md transition-all duration-300">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Tasks Completed
@@ -86,15 +92,25 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, onToggleComplete, onAddTas
         <div>
           <TaskList 
             title="Today's Tasks" 
-            tasks={todayTasks}
+            tasks={todayTasksLimited}
             onToggleComplete={onToggleComplete}
             onAddClick={onAddTask}
           />
           
-          <div className="mt-4 flex justify-end">
-            <Link to="/tasks" className="flex items-center text-sm text-primary hover:underline">
-              <ListTodo className="h-4 w-4 mr-1" />
-              View all tasks
+          <div className="mt-4 flex justify-end gap-2">
+            {hasMoreTodayTasks && (
+              <Link to="/tasks">
+                <Button variant="outline" size="sm" className="flex items-center gap-1">
+                  <ListTodo className="h-4 w-4" />
+                  View all today's tasks
+                </Button>
+              </Link>
+            )}
+            <Link to="/analysis" className="ml-auto">
+              <Button variant="outline" size="sm" className="flex items-center gap-1">
+                <BarChart3 className="h-4 w-4" />
+                View Analytics
+              </Button>
             </Link>
           </div>
         </div>
@@ -111,10 +127,10 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, onToggleComplete, onAddTas
           
           <Card>
             <CardContent className="p-0">
-              {upcomingTasks.length > 0 ? (
+              {upcomingTasksLimited.length > 0 ? (
                 <div className="divide-y">
-                  {upcomingTasks.map(task => (
-                    <div key={task.id} className="p-4 flex items-start">
+                  {upcomingTasksLimited.map(task => (
+                    <div key={task.id} className="p-4 flex items-start hover:bg-accent/10 transition-colors">
                       <div className="mr-4 p-2 bg-accent rounded-md">
                         <span className="text-accent-foreground font-medium">
                           {format(new Date(task.dueDate), 'd')}
@@ -131,10 +147,17 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, onToggleComplete, onAddTas
                       </div>
                     </div>
                   ))}
+                  {hasMoreUpcomingTasks && (
+                    <div className="p-3 text-center">
+                      <Link to="/tasks">
+                        <Button variant="ghost" size="sm">View all upcoming tasks</Button>
+                      </Link>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="p-6 text-center text-muted-foreground">
-                  <CheckCircle className="h-6 w-6 mx-auto mb-2 text-muted" />
+                  <CalendarIcon className="h-6 w-6 mx-auto mb-2 text-muted" />
                   No upcoming tasks
                 </div>
               )}

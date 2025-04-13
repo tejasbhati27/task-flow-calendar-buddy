@@ -7,6 +7,7 @@ import Navbar from '@/components/Navbar';
 import Dashboard from './Dashboard';
 import CalendarPage from './CalendarPage';
 import TasksPage from './TasksPage';
+import AnalysisPage from './AnalysisPage';
 import TaskModal from '@/components/TaskModal';
 
 // Sample initial tasks
@@ -144,6 +145,14 @@ const Index = () => {
               tasks={tasks}
               onToggleComplete={handleToggleComplete}
               onAddTask={() => openAddTaskModal()}
+            />
+          } 
+        />
+        <Route 
+          path="/analysis" 
+          element={
+            <AnalysisPage 
+              tasks={tasks}
             />
           } 
         />
