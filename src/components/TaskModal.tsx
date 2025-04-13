@@ -81,6 +81,14 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, onSubmit, defaul
     onClose();
   };
 
+  // Handle Enter key in title input
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      form.handleSubmit(handleSubmit)();
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[500px]">
@@ -96,7 +104,11 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, onSubmit, defaul
                 <FormItem>
                   <FormLabel>Task Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter task title" {...field} />
+                    <Input 
+                      placeholder="Enter task title" 
+                      {...field} 
+                      onKeyDown={handleKeyDown} 
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

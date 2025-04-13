@@ -132,6 +132,7 @@ const Index = () => {
           element={
             <CalendarPage 
               tasks={tasks}
+              onToggleComplete={handleToggleComplete}
               onDateClick={(date) => openAddTaskModal(date)}
             />
           } 
