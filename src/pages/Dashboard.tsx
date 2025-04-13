@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import TaskList from '@/components/TaskList';
 import { Task } from '@/types';
 import { format, isToday } from 'date-fns';
-import { Calendar as CalendarIcon, ListTodo, BarChart3 } from 'lucide-react';
+import { Calendar as CalendarIcon, ListTodo, BarChart3, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
@@ -12,9 +12,15 @@ interface DashboardProps {
   tasks: Task[];
   onToggleComplete: (id: string, completed: boolean) => void;
   onAddTask: () => void;
+  onAddUpcomingTask: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ tasks, onToggleComplete, onAddTask }) => {
+const Dashboard: React.FC<DashboardProps> = ({ 
+  tasks, 
+  onToggleComplete, 
+  onAddTask,
+  onAddUpcomingTask
+}) => {
   // Filter today's tasks
   const todayTasks = tasks.filter(task => isToday(new Date(task.dueDate)));
   const todayTasksLimited = todayTasks.slice(0, 10);
@@ -30,11 +36,13 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, onToggleComplete, onAddTas
   const upcomingTasksLimited = upcomingTasks.slice(0, 10);
   const hasMoreUpcomingTasks = upcomingTasks.length > 10;
   
-  // Calculate completion stats
-  const completedTasks = tasks.filter(task => task.completed).length;
-  const completionRate = tasks.length > 0 
-    ? Math.round((completedTasks / tasks.length) * 100) 
+  // Calculate completion stats for today's tasks only
+  const todayCompletedTasks = todayTasks.filter(task => task.completed).length;
+  const todayCompletionRate = todayTasks.length > 0 
+    ? Math.round((todayCompletedTasks / todayTasks.length) * 100) 
     : 0;
+  
+  const todayRemainingTasks = todayTasks.length - todayCompletedTasks;
 
   return (
     <div className="container py-8 animate-fade-in">
@@ -44,7 +52,7 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, onToggleComplete, onAddTas
         <Card className="hover:shadow-md transition-all duration-300">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Tasks Today
+              Today's Tasks
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -58,15 +66,15 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, onToggleComplete, onAddTas
         <Card className="hover:shadow-md transition-all duration-300">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Completion Rate
+              Today's Completion Rate
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{completionRate}%</div>
+            <div className="text-3xl font-bold">{todayCompletionRate}%</div>
             <div className="h-2 mt-2 rounded-full bg-muted overflow-hidden">
               <div 
                 className="h-full bg-primary transition-all duration-500" 
-                style={{ width: `${completionRate}%` }} 
+                style={{ width: `${todayCompletionRate}%` }} 
               />
             </div>
           </CardContent>
@@ -75,13 +83,13 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, onToggleComplete, onAddTas
         <Card className="hover:shadow-md transition-all duration-300">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Tasks Completed
+              Remaining Today
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{completedTasks}</div>
+            <div className="text-3xl font-bold">{todayRemainingTasks}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Out of {tasks.length} total tasks
+              {todayCompletedTasks} of {todayTasks.length} completed
             </p>
           </CardContent>
         </Card>
@@ -118,11 +126,22 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, onToggleComplete, onAddTas
         {/* Upcoming Tasks */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Upcoming</h2>
-            <Link to="/calendar" className="flex items-center text-sm text-primary hover:underline">
-              <CalendarIcon className="h-4 w-4 mr-1" />
-              Calendar view
-            </Link>
+            <h2 className="text-xl font-semibold">Upcoming Goals & Targets</h2>
+            <div className="flex items-center gap-2">
+              <Button 
+                onClick={onAddUpcomingTask} 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-1"
+              >
+                <Plus className="h-4 w-4" />
+                Add Target
+              </Button>
+              <Link to="/calendar" className="flex items-center text-sm text-primary hover:underline">
+                <CalendarIcon className="h-4 w-4 mr-1" />
+                Calendar view
+              </Link>
+            </div>
           </div>
           
           <Card>
@@ -158,7 +177,18 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, onToggleComplete, onAddTas
               ) : (
                 <div className="p-6 text-center text-muted-foreground">
                   <CalendarIcon className="h-6 w-6 mx-auto mb-2 text-muted" />
-                  No upcoming tasks
+                  No upcoming targets
+                  <div className="mt-2">
+                    <Button 
+                      onClick={onAddUpcomingTask} 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex items-center gap-1 mx-auto"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add Target
+                    </Button>
+                  </div>
                 </div>
               )}
             </CardContent>
